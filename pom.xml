@@ -1,0 +1,225 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.msm</groupId>
+  <artifactId>play-maven-test</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>play2</packaging>
+
+  <name>play-maven-test</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>1.7</java.version>
+    <scala.version>2.10</scala.version>
+    <play.version>2.2.1</play.version>
+    <maven.checkstyle.plugin>2.10</maven.checkstyle.plugin>
+    <maven.findbugs.plugin>2.5.2</maven.findbugs.plugin>
+    <!-- Need to use same version of pmd as used by sonar, hence NOT using latest maven-pmd-plugin
+    See http://docs.codehaus.org/pages/diffpages.action?pageId=230397163&originalId=231739482
+    See http://pmd.sourceforge.net/pmd-4.3/rules/index.html -->
+    <maven.pmd.plugin>2.7.1</maven.pmd.plugin>
+    <codequality.version>0.1.0-SNAPSHOT</codequality.version>
+  </properties>
+
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>typesafe-releases</id>-->
+            <!--<name>typesafe-releases</name>-->
+            <!--<url>http://repo.typesafe.com/typesafe/releases</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
+
+    <!-- Repositories where to look for artifacts and plugins.  -->
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>all-releases</name>
+            <url>http://artifactory.msm.cakesolutions.net/artifactory/all-releases</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>snapshots</id>
+            <name>all-snapshot</name>
+            <url>http://artifactory.msm.cakesolutions.net/artifactory/all-snapshot</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>plugins-release</name>
+            <url>http://artifactory.msm.cakesolutions.net/artifactory/plugins-release</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots />
+            <id>snapshots</id>
+            <name>plugins-snapshot</name>
+            <url>http://artifactory.msm.cakesolutions.net/artifactory/plugins-snapshot</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>com.msm</groupId>
+                <artifactId>code-quality</artifactId>
+                <version>${codequality.version}</version>
+            </extension>
+        </extensions>
+
+        <sourceDirectory>${basedir}/app</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>${basedir}/conf</directory>
+            </resource>
+            <resource>
+                <directory>${basedir}</directory>
+                <includes>
+                    <include>public/**</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <testSourceDirectory>${basedir}/test</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>${basedir}/test-conf</directory>
+            </testResource>
+        </testResources>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.nanoko.playframework</groupId>
+                    <artifactId>play2-maven-plugin</artifactId>
+                    <version>1.2.4</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.nanoko.playframework</groupId>
+                <artifactId>play2-maven-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyle.plugin}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.msm</groupId>
+                        <artifactId>code-quality</artifactId>
+                        <version>${codequality.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>default-checkstyle-checks</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <configLocation>checkstyle.xml</configLocation>
+                            <consoleOutput>true</consoleOutput>
+                            <logViolationsToConsole>true</logViolationsToConsole>
+                            <violationSeverity>warning</violationSeverity>
+                            <failOnViolation>true</failOnViolation>
+                        </configuration>
+                    </execution>
+                </executions>
+                <!-- Use -Dcheckstyle.skipExec=true to bypass -->
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${maven.findbugs.plugin}</version>
+                <executions>
+                    <execution>
+                        <id>default-findbugs-checks</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <includeFilterFile>findbugs.xml</includeFilterFile>
+                            <excludeFilterFile>findbugs-exclusions.xml</excludeFilterFile>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven.pmd.plugin}</version>
+                <configuration>
+                    <failOnViolation>true</failOnViolation>
+                    <failurePriority>3</failurePriority>
+                    <aggregate>true</aggregate>
+                    <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
+                    <!-- The minimum tokens before a violation -->
+                    <minimumTokens>100</minimumTokens>
+                    <!-- Turn off if no xref report -->
+                    <linkXRef>true</linkXRef>
+                    <verbose>true</verbose>
+                    <targetJdk>${java.version}</targetJdk>
+                    <rulesets>
+                        <ruleset>pmd.xml</ruleset>
+                    </rulesets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>pmd</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <dependencies>
+        <!-- Play Framework Dependencies -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play_${scala.version}</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-test_${scala.version}</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- the Java API is in this artifact -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-java_${scala.version}</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>3.8.1</version>
+          <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
